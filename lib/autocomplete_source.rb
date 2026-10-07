@@ -91,8 +91,11 @@ module AutocompleteSource
     include AutocompleteSource
 
     # returns a properly escaped and case-insensitive regexp for a more manual search
+    # Parentheses are ignored, so "Others" matches "Other(s)" and vice versa.
     def get_search_regex(search_param)
-      Regexp.new(Regexp.escape(search_param), Regexp::IGNORECASE)
+      pattern = search_param.gsub(/[()]/, "").chars
+        .map { |char| Regexp.escape(char) }.join("[()]*")
+      Regexp.new(pattern, Regexp::IGNORECASE)
     end
 
     # takes either an array or string of search terms (typically extra values passed in through live params, like fandom)
@@ -242,11 +245,12 @@ module AutocompleteSource
     # Split a string into words.
     def autocomplete_phrase_split(string)
       # transliterate to handle downcasing letters with accents or other diacritics.
-      normalized = self.transliterate(string).downcase.to_s
+      # Remove parentheses so "Other(s)" is indexed as "others".
+      normalized = self.transliterate(string).downcase.to_s.gsub(/[()]/, "")
 
       # Split on one or more spaces, ampersands, slashes, double quotation marks,
-      # opening parentheses, closing parentheses (just in case), tildes, hyphens, vertical bars
-      normalized.split(%r{(?:\s|&|/|"|\(|\)|~|-|\|)+})
+      # tildes, hyphens, vertical bars
+      normalized.split(%r{(?:\s|&|/|"|~|-|\|)+})
     end
 
     def autocomplete_pieces(string)
