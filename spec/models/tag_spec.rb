@@ -352,6 +352,28 @@ describe Tag do
         expect(results).to eq(["#{tag_freeform.id}: #{tag_freeform.name}"])
       end
 
+      it "autocomplete returns nothing for a parentheses-only term" do
+        fandom = create(:canonical_fandom, name: "Star Trek")
+        tag_character = create(:canonical_character, name: "Original Characters")
+        CommonTagging.create!(common_tag: tag_character, filterable: fandom)
+        ["(", "()"].each do |term|
+          results = Tag.autocomplete_fandom_lookup(
+            term: +term, fandom: "Star Trek", tag_type: "character",
+            fallback: false
+          )
+          expect(results).to be_empty
+        end
+      end
+
+      it "autocomplete does not split words at parentheses" do
+        create(:canonical_freeform, name: "Foo(Bar)")
+        results = Tag.autocomplete_lookup(
+          search_param: "bar",
+          autocomplete_prefix: "autocomplete_tag_freeform"
+        )
+        expect(results).to be_empty
+      end
+
       it "old tag maker still works" do
         tag_adult = Rating.create_canonical(+"adult", true)
         tag_normal = ArchiveWarning.create_canonical(+"other")
