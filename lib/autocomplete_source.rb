@@ -98,7 +98,8 @@ module AutocompleteSource
       return if stripped.empty?
 
       pattern = stripped.chars
-        .map { |char| Regexp.escape(char) }.join("[()]*")
+        .map { |char| Regexp.escape(char) }
+        .join("[()]*")
       Regexp.new(pattern, Regexp::IGNORECASE)
     end
 
