@@ -78,7 +78,7 @@ describe AdminPost do
     end
   end
 
-  describe "translation language uniqueness" do
+  describe "#translated_post_id" do
     let(:admin_post) { create(:admin_post) }
     let(:language) { create(:language) }
     let(:translation) do
